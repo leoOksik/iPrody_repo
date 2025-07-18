@@ -24,13 +24,15 @@ jobs:
 
       # Шаг 3: Компиляция проекта (без тестов)
       - name: Compile with Maven
+        working-directory: ./payment-service
         run: mvn -B clean compile
 
       # Шаг 4: Запуск тестов
       - name: Run tests
+        working-directory: ./payment-service
         run: mvn -B test
 
       # Шаг 5: Запуск Checkstyle
       - name: Run Checkstyle for payment-service-app
-        working-directory: ./payment-service-app
+        working-directory: ./payment-service/payment-service-app
         run: mvn -B checkstyle:check
