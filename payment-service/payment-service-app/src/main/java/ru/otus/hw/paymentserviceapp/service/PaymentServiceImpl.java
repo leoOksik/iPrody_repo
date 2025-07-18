@@ -30,7 +30,7 @@ public class PaymentServiceImpl implements PaymentService {
         Random random = new Random();
 
         for (int i = 1; i < 6; i++) {
-            double value = Math.round((random.nextDouble() * 1000) * 100.0) / 100.0;
+            double value = Math.round((random.nextDouble() * 1000 * 100.0) / 100.0;
             payments.put((long) i, new Payment(i, value));
         }
     }
