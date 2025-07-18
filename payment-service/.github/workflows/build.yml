@@ -32,5 +32,5 @@ jobs:
 
       # Шаг 5: Запуск Checkstyle
       - name: Run Checkstyle for payment-service-app
-        working-directory: ./payment-service-app
+        working-directory: ./payment-service/payment-service-app
         run: mvn -B checkstyle:check
