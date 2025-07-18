@@ -1,7 +1,7 @@
 name: Build Project for PR
 
 on:
-  # Запуск только при создании или обновлении pull request в ветку main
+  # Запуск при создании или обновлении PR в ветку main
   pull_request:
     branches:
       - 'main'
@@ -22,6 +22,15 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # Шаг 3: Сборка Maven-проекта
-      - name: Build with Maven
-        run: mvn clean install
+      # Шаг 3: Компиляция проекта (без тестов)
+      - name: Compile with Maven
+        run: mvn -B clean compile
+
+      # Шаг 4: Запуск тестов
+      - name: Run tests
+        run: mvn -B test
+
+      # Шаг 5: Запуск Checkstyle
+      - name: Run Checkstyle for payment-service-app
+        working-directory: ./payment-service-app
+        run: mvn -B checkstyle:check
