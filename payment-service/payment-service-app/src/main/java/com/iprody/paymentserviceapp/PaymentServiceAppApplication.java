@@ -1,4 +1,4 @@
-package ru.otus.hw.paymentserviceapp;
+package com.iprody.paymentserviceapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

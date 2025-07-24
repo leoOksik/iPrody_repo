@@ -1,0 +1,21 @@
+INSERT INTO payment (guid, amount, created_at, currency, inquiry_ref_id, note,
+                     status, transaction_ref_id, updated_at)
+VALUES ('123e4567-e89b-12d3-a456-426614174100',
+        100.50,
+        '2025-07-24 16:00:00',
+        'USD',
+        '9f8c33aa-b12f-4c45-92d1-7e637f5764c4',
+        'Оплата за заказ #1234',
+        'APPROVED',
+        'ab123e7f-56d4-43e6-a5e1-2b9f4e8cdef7',
+        '2025-07-24 16:05:00'),
+
+       ('223e4567-e89b-12d3-a456-426614174001',
+        250.00,
+        '2025-07-25 10:30:00',
+        'EUR',
+        '223e4567-b12f-4c45-92d1-7e637f5764c5',
+        'Оплата за заказ #1235',
+        'PENDING',
+        'bb123e7f-56d4-43e6-a5e1-2b9f4e8cdef8',
+        '2025-07-25 10:45:00');
