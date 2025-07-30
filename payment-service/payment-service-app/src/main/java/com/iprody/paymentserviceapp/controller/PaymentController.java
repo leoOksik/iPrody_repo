@@ -38,23 +38,27 @@ public class PaymentController {
 
     @GetMapping("/search")
     public Page<Payment> searchPayments(
-            @ModelAttribute PaymentFilterDTO paymentFilter,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "amount") String sortBy,
-            @RequestParam(defaultValue = "desc") String direction) {
+        @ModelAttribute PaymentFilterDTO paymentFilter,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "5") int size,
+        @RequestParam(defaultValue = "amount") String sortBy,
+        @RequestParam(defaultValue = "desc") String direction) {
 
         if (!sortBy.equals("createdAt") && !sortBy.equals("amount")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Only sort by amount or createdAt");
+                "Only sort by amount or createdAt");
         }
         if (!direction.equals("desc") && !direction.equals("asc")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Only desc or asc sorting");
+                "Only desc or asc sorting");
         }
-        Sort sort = direction.equalsIgnoreCase("desc")
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
+
+        final Sort sort;
+        if (direction.equalsIgnoreCase("desc")) {
+            sort = Sort.by(sortBy).descending();
+        } else {
+            sort = Sort.by(sortBy).ascending();
+        }
         return paymentService.searchPaged(paymentFilter, PageRequest.of(page, size, sort));
     }
 }
