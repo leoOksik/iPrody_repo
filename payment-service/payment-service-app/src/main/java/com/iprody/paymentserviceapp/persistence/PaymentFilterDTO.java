@@ -1,4 +1,4 @@
-package com.iprody.paymentserviceapp.persistency;
+package com.iprody.paymentserviceapp.persistence;
 
 import com.iprody.paymentserviceapp.persistence.entity.PaymentStatus;
 import lombok.Getter;
