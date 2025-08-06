@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: 1.0-create-payment-table
-      author: mentor
+      author: oksana
       changes:
         - createTable:
             tableName: payment
