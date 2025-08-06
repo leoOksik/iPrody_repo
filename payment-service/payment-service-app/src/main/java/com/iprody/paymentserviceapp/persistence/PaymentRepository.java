@@ -1,4 +1,4 @@
-package com.iprody.paymentserviceapp.persistency;
+package com.iprody.paymentserviceapp.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.iprody.paymentserviceapp.persistence.entity.Payment;

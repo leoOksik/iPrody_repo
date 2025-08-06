@@ -1,6 +1,7 @@
 package com.iprody.paymentserviceapp.controller;
 
-import com.iprody.paymentserviceapp.persistency.PaymentFilterDTO;
+import com.iprody.paymentserviceapp.dto.PaymentDto;
+import com.iprody.paymentserviceapp.persistence.PaymentFilterDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import com.iprody.paymentserviceapp.persistence.entity.Payment;
 import com.iprody.paymentserviceapp.service.PaymentService;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -27,17 +27,17 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @GetMapping("all")
-    public List<Payment> getPayments() {
+    public List<PaymentDto> getPayments() {
         return paymentService.getPayments();
     }
 
     @GetMapping("/{guid}")
-    public Payment getPayment(@PathVariable UUID guid) {
+    public PaymentDto getPayment(@PathVariable UUID guid) {
         return paymentService.getPayment(guid);
     }
 
     @GetMapping("/search")
-    public Page<Payment> searchPayments(
+    public Page<PaymentDto> searchPayments(
         @ModelAttribute PaymentFilterDTO paymentFilter,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size,
