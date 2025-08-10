@@ -19,6 +19,11 @@ curl -v -X POST "http://localhost:8080/api/payments" ^
 -H "Content-Type: application/json" ^
 -d "{""inquiryRefId"":""a1b2c3d4-e5f6-7990-abcd-1234567890ab"",""amount"":122.50,""currency"":""USD"",""transactionRefId"":""b2c3d1e5-f678-90ab-cdef-1234567890ab"",""status"":""DECLINED"",""note"":""new note"",""createdAt"":""2025-08-01T10:15:30+03:00"",""updatedAt"":""2025-08-08T16:20:00+03:00""}"
 
+//  check method -> create -> validation Guid
+curl -v -X POST "http://localhost:8080/api/payments" ^
+-H "Content-Type: application/json" ^
+-d "{""guid"":""a1b2c3d4-e5f6-7890-abcd-1254567890ab"",""inquiryRefId"":""a1b2c3d4-e5f6-7990-abcd-1234567890ab"",""amount"":122.50,""currency"":""USD"",""transactionRefId"":""b2c3d1e5-f678-90ab-cdef-1234567890ab"",""status"":""DECLINED"",""note"":""new note"",""createdAt"":""2025-08-01T10:15:30+03:00"",""updatedAt"":""2025-08-08T16:20:00+03:00""}"
+
 //  check method -> update
 curl -v -X PUT "http://localhost:8080/api/payments/ac328a1a-1e60-4dd3-bee5-ed573d74c841" ^
 -H "Content-Type: application/json" ^

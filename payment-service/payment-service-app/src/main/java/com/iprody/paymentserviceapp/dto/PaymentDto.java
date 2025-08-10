@@ -1,7 +1,13 @@
 package com.iprody.paymentserviceapp.dto;
 
 import com.iprody.paymentserviceapp.persistence.entity.PaymentStatus;
-import lombok.*;
+import jakarta.validation.constraints.Null;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Builder;
+
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -13,6 +19,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class PaymentDto {
+
+    @Null(message = "GUID must be auto generated")
     private UUID guid;
     private UUID inquiryRefId;
     private BigDecimal amount;
