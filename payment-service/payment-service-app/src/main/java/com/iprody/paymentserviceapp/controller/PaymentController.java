@@ -74,7 +74,7 @@ public class PaymentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PaymentDto create(@RequestBody PaymentDto dto) {
+    public PaymentDto create(@RequestBody @Valid PaymentDto dto) {
         return paymentService.create(dto);
     }
 
