@@ -35,6 +35,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentDto create(PaymentDto dto) {
+        if (dto.getGuid() != null) {
+            throw new IllegalArgumentException("GUID must be generated automatically");
+        }
         final Payment entity = paymentMapper.toEntity(dto);
         entity.setGuid(UUID.randomUUID());
         final Payment saved = paymentRepository.save(entity);
@@ -56,8 +59,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentDto update(UUID guid, PaymentDto paymentDto) {
-        final Payment paymentExisting = paymentRepository.findById(guid)
-            .orElseThrow(() -> new EntityNotFoundException("Payment not found: " + guid));
+        if (!paymentRepository.existsById(guid)) {
+            throw new EntityNotFoundException("Payment not found: " + guid);
+        }
         final Payment updatedPayment = paymentMapper.toEntity(paymentDto);
         updatedPayment.setGuid(guid);
         final Payment savedPayment = paymentRepository.save(updatedPayment);
