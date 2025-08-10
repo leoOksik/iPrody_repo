@@ -17,18 +17,27 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -121,50 +130,69 @@ public class PaymentServiceTest {
 
     static Stream<PaymentStatus> statusProvider() {
         return Stream.of(
-                PaymentStatus.RECEIVED,
-                PaymentStatus.PENDING,
-                PaymentStatus.APPROVED,
-                PaymentStatus.DECLINED,
-                PaymentStatus.NOT_SENT
+            PaymentStatus.RECEIVED,
+            PaymentStatus.PENDING,
+            PaymentStatus.APPROVED,
+            PaymentStatus.DECLINED,
+            PaymentStatus.NOT_SENT
         );
+    }
+
+
+    record FilterTestData(PaymentFilterDTO filter, Consumer<List<PaymentDto>> validator) {
     }
 
     @ParameterizedTest
     @MethodSource("filterProvider")
-    void shouldSearchPaymentsByFilterField(PaymentFilterDTO filter) {
+    void shouldSearchPaymentsByFilterField(FilterTestData filterTestData)  {
         // given
         when(paymentRepository.findAll(any(Specification.class))).thenReturn(List.of(payment));
         when(paymentMapper.toDto(payment)).thenReturn(paymentDto);
 
         // when
-        PaymentDto result = paymentService.search(filter).get(0);
+        List<PaymentDto> results = paymentService.search(filterTestData.filter());
 
         // then
-        assertThat(result).isNotNull();
-        if (filter.getCurrency() != null) {
-            assertThat(result.getCurrency()).isEqualTo(filter.getCurrency());
-        }
-        if (filter.getMinAmount() != null) {
-            assertThat(result.getAmount()).isGreaterThanOrEqualTo(filter.getMinAmount());
-        }
-        if (filter.getMaxAmount() != null) {
-            assertThat(result.getAmount()).isLessThanOrEqualTo(filter.getMaxAmount());
-        }
-        if (filter.getCreatedAtAfter() != null) {
-            assertThat(result.getCreatedAt().toInstant()).isAfter(filter.getCreatedAtAfter());
-        }
-        if (filter.getCreatedAtBefore() != null) {
-            assertThat(result.getCreatedAt().toInstant()).isBefore(filter.getCreatedAtBefore());
-        }
+        assertThat(results).isNotNull();
+        filterTestData.validator().accept(results);
+
     }
 
-    static Stream<PaymentFilterDTO> filterProvider() {
+    static Stream<FilterTestData> filterProvider() {
+        final String currency = "USD";
+        final BigDecimal minAmount = BigDecimal.valueOf(167.77);
+        final BigDecimal maxAmount = BigDecimal.valueOf(467.77);
+        final Instant createdAtAfter = Instant.now().minusSeconds(5400);
+        final Instant createdAtBefore = Instant.now().plusSeconds(5400);
+
         return Stream.of(
-                PaymentFilterDTO.builder().currency("USD").build(),
-                PaymentFilterDTO.builder().minAmount(BigDecimal.valueOf(167.77)).build(),
-                PaymentFilterDTO.builder().maxAmount(BigDecimal.valueOf(467.77)).build(),
-                PaymentFilterDTO.builder().createdAtAfter(Instant.now().minusSeconds(5400)).build(),
-                PaymentFilterDTO.builder().createdAtBefore(Instant.now().plusSeconds(5400)).build()
+            new FilterTestData(
+                PaymentFilterDTO.builder().currency(currency).build(),
+                results -> results.forEach(dto ->
+                    assertThat(dto.getCurrency()).isEqualTo(currency))
+            ),
+            new FilterTestData(
+                PaymentFilterDTO.builder().minAmount(minAmount).build(),
+                results -> results.forEach(dto ->
+                    assertThat(dto.getAmount()).isGreaterThanOrEqualTo(minAmount))
+            ),
+            new FilterTestData(
+                PaymentFilterDTO.builder().maxAmount(maxAmount).build(),
+                results -> results.forEach(dto ->
+                    assertThat(dto.getAmount()).isLessThanOrEqualTo(maxAmount))
+            ),
+            new FilterTestData(
+                PaymentFilterDTO.builder().createdAtAfter(createdAtAfter).build(),
+                results -> results.forEach(dto ->
+                    assertThat(dto.getCreatedAt().toInstant()).isAfter(createdAtAfter)
+                )
+            ),
+            new FilterTestData(
+                PaymentFilterDTO.builder().createdAtBefore(createdAtBefore).build(),
+                results -> results.forEach(dto ->
+                    assertThat(dto.getCreatedAt().toInstant()).isBefore(createdAtBefore)
+                )
+            )
         );
     }
 
@@ -189,7 +217,7 @@ public class PaymentServiceTest {
         Pageable pageable = PageRequest.of(0, 1, sortBy);
 
         when(paymentRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(
-                new PageImpl<>(paymentList.stream().sorted(comparatorEntity).toList(), pageable, paymentList.size()));
+            new PageImpl<>(paymentList.stream().sorted(comparatorEntity).toList(), pageable, paymentList.size()));
 
         when(paymentMapper.toDto(payment)).thenReturn(paymentDto);
         when(paymentMapper.toDto(payment2)).thenReturn(paymentDto2);
@@ -204,14 +232,14 @@ public class PaymentServiceTest {
 
     static Stream<Arguments> sortProvider() {
         return Stream.of(
-                Arguments.of(Sort.by("amount").ascending(),
-                        Comparator.comparing(Payment::getAmount), Comparator.comparing(PaymentDto::getAmount)),
-                Arguments.of(Sort.by("amount").descending(),
-                        Comparator.comparing(Payment::getAmount).reversed(), Comparator.comparing(PaymentDto::getAmount).reversed()),
-                Arguments.of(Sort.by("createdAt").ascending(),
-                        Comparator.comparing(Payment::getCreatedAt), Comparator.comparing(PaymentDto::getCreatedAt)),
-                Arguments.of(Sort.by("createdAt").descending(),
-                        Comparator.comparing(Payment::getCreatedAt).reversed(), Comparator.comparing(PaymentDto::getCreatedAt).reversed())
+            Arguments.of(Sort.by("amount").ascending(),
+                Comparator.comparing(Payment::getAmount), Comparator.comparing(PaymentDto::getAmount)),
+            Arguments.of(Sort.by("amount").descending(),
+                Comparator.comparing(Payment::getAmount).reversed(), Comparator.comparing(PaymentDto::getAmount).reversed()),
+            Arguments.of(Sort.by("createdAt").ascending(),
+                Comparator.comparing(Payment::getCreatedAt), Comparator.comparing(PaymentDto::getCreatedAt)),
+            Arguments.of(Sort.by("createdAt").descending(),
+                Comparator.comparing(Payment::getCreatedAt).reversed(), Comparator.comparing(PaymentDto::getCreatedAt).reversed())
         );
     }
 
@@ -230,7 +258,7 @@ public class PaymentServiceTest {
         Pageable pageable = PageRequest.of(0, 25);
 
         when(paymentRepository.findAll(any(Specification.class), eq(pageable)))
-                .thenReturn(new PageImpl<>(paymentList, pageable, paymentList.size()));
+            .thenReturn(new PageImpl<>(paymentList, pageable, paymentList.size()));
         when(paymentMapper.toDto(payment)).thenReturn(paymentDto);
         when(paymentMapper.toDto(payment2)).thenReturn(paymentDto2);
 
