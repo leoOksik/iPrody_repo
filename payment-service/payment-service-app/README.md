@@ -84,13 +84,13 @@ curl -v -G -H "Authorization: Bearer $ACCESS_TOKEN" "http://localhost:8080/api/p
 // --------- only for admin ---------- 
 
 // patch update 
-curl -v -X PATCH "http://localhost:8080/api/payments/ac328a1a-1e60-4dd3-bee5-ed573d74c841/note" \
+curl -v -X PATCH "http://localhost:8080/api/payments/d552c963-4008-4eaa-bac2-9c7c4dd43f73/note" \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer $ACCESS_TOKEN" \
 -d '{"note":"new noteTest"}'
 
 // update
-curl -v -X PUT "http://localhost:8080/api/payments/ac328a1a-1e60-4dd3-bee5-ed573d74c841" \
+curl -v -X PUT "http://localhost:8080/api/payments/d552c963-4008-4eaa-bac2-9c7c4dd43f73" \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer $ACCESS_TOKEN" \
 -d '{
@@ -105,7 +105,7 @@ curl -v -X PUT "http://localhost:8080/api/payments/ac328a1a-1e60-4dd3-bee5-ed573
 }'
 
 // delete
-curl -v -X DELETE "http://localhost:8080/api/payments/ac328a1a-1e60-4dd3-bee5-ed573d74c841" \
+curl -v -X DELETE "http://localhost:8080/api/payments/123e4567-e89b-12d3-a456-426614174100" \
 -H "Authorization: Bearer $ACCESS_TOKEN"
 
 // create
@@ -122,3 +122,18 @@ curl -v -X POST "http://localhost:8080/api/payments" \
    "createdAt":"2025-08-01T10:15:30+03:00",
    "updatedAt":"2025-08-08T16:20:00+03:00"
 }'
+
+
+// ---------- actuator (health,info,metrics,env,loggers)----------
+
+// Запрос данных о текущем состоянии
+curl -H "Authorization: Bearer $ACCESS_TOKEN" "http://localhost:8080/actuator/health"
+
+// Список метрик
+curl -H "Authorization: Bearer $ACCESS_TOKEN" "http://localhost:8080/actuator/metrics"
+
+// Значение каждой метрики из этого списка
+curl -H "Authorization: Bearer $ACCESS_TOKEN" "http://localhost:8080/actuator/metrics/<metric name>"
+
+// Запросить информацию об HTTP запросах к приложению
+curl -H "Authorization: Bearer $ACCESS_TOKEN" "http://localhost:8080/actuator/metrics/http.server.requests"

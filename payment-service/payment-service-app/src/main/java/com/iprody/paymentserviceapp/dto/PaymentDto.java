@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
+import lombok.ToString;
 
 
 import java.math.BigDecimal;
@@ -18,6 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class PaymentDto {
 
     @Null(message = "GUID must be auto generated")
