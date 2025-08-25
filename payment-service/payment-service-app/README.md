@@ -32,9 +32,93 @@ curl -v -X PUT "http://localhost:8080/api/payments/ac328a1a-1e60-4dd3-bee5-ed573
 // check method -> searchPayments
 curl -G "http://localhost:8080/api/payments/search" ^
 --data-urlencode "paymentStatus=DECLINED" ^
---data-urlencode "currency=USD" ^
+--data-urlencode "currency=EUR" ^
 --data-urlencode "minAmount=10.00" ^
 --data-urlencode "createdAtAfter=2025-01-01T00:00:00Z" ^
 --data-urlencode "page=0" ^
 --data-urlencode "size=10" ^
 --data-urlencode "sort=createdAt,desc"
+
+
+// bash
+//получение JWT-токена
+
+//для user_admin
+curl -X POST "http://localhost:8085/realms/iprody-lms/protocol/openid-connect/token" \
+-H "Content-Type: application/x-www-form-urlencoded" \
+-d "grant_type=password" \
+-d "client_id=basic_client" \
+-d "client_secret=myclient-secret" \
+-d "username=user_admin" \
+-d "password=myPassword"
+
+// для user_reader
+curl -X POST "http://localhost:8085/realms/iprody-lms/protocol/openid-connect/token" \
+-H "Content-Type: application/x-www-form-urlencoded" \
+-d "grant_type=password" \
+-d "client_id=basic_client" \
+-d "client_secret=myclient-secret" \
+-d "username=user_reader" \
+-d "password=readerPassword"
+
+ACCESS_TOKEN="generated_token_from_above_command"
+
+// --------- for admin and reader ---------
+
+// Get all payments
+curl -v -H "Authorization: Bearer $ACCESS_TOKEN" "http://localhost:8080/api/payments/all"
+
+// Get payment by id 
+curl -v -H "Authorization: Bearer $ACCESS_TOKEN" "http://localhost:8080/api/payments/d552c963-4008-4eaa-bac2-9c7c4dd43f73"
+
+// search payments
+curl -v -G -H "Authorization: Bearer $ACCESS_TOKEN" "http://localhost:8080/api/payments/search" \
+--data-urlencode "paymentStatus=DECLINED" \
+--data-urlencode "currency=EUR" \
+--data-urlencode "minAmount=10.00" \
+--data-urlencode "createdAtAfter=2025-01-01T00:00:00Z" \
+--data-urlencode "page=0" \
+--data-urlencode "size=10" \
+--data-urlencode "sort=createdAt,desc"
+
+// --------- only for admin ---------- 
+
+// patch update 
+curl -v -X PATCH "http://localhost:8080/api/payments/ac328a1a-1e60-4dd3-bee5-ed573d74c841/note" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer $ACCESS_TOKEN" \
+-d '{"note":"new noteTest"}'
+
+// update
+curl -v -X PUT "http://localhost:8080/api/payments/ac328a1a-1e60-4dd3-bee5-ed573d74c841" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer $ACCESS_TOKEN" \
+-d '{
+   "inquiryRefId":"a1b2c3d4-e5f6-7890-abcd-1234567890ab",
+   "amount":42.50,
+   "currency":"EUR",
+   "transactionRefId":"b2c3d4e5-f678-90ab-cdef-1234567890ab",
+   "status":"RECEIVED",
+   "note":"new note2",
+   "createdAt":"2025-08-01T10:15:30+03:00",
+   "updatedAt":"2025-08-08T16:20:00+03:00"
+}'
+
+// delete
+curl -v -X DELETE "http://localhost:8080/api/payments/ac328a1a-1e60-4dd3-bee5-ed573d74c841" \
+-H "Authorization: Bearer $ACCESS_TOKEN"
+
+// create
+curl -v -X POST "http://localhost:8080/api/payments" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer $ACCESS_TOKEN" \
+-d '{
+   "inquiryRefId":"a1b2c3d4-e5f6-7990-abcd-1234567890ab",
+   "amount":122.50,
+   "currency":"USD",
+   "transactionRefId":"b2c3d1e5-f678-90ab-cdef-1234567890ab",
+   "status":"DECLINED",
+   "note":"new note",
+   "createdAt":"2025-08-01T10:15:30+03:00",
+   "updatedAt":"2025-08-08T16:20:00+03:00"
+}'
