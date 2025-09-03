@@ -6,6 +6,7 @@ import com.iprody.paymentserviceapp.persistence.PaymentFilterDTO;
 import com.iprody.paymentserviceapp.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -20,6 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/payments")
 @AllArgsConstructor
+@Slf4j
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -27,14 +29,20 @@ public class PaymentController {
     @GetMapping("/all")
     @PreAuthorize("hasAnyRole('admin', 'reader')")
     public List<PaymentDto> getPayments() {
-        return paymentService.getPayments();
+        log.info("GET all payments");
+        final List<PaymentDto> payments = paymentService.getPayments();
+        log.debug("Sending response payments list with size: {}", payments.size());
+        return payments;
     }
 
     @GetMapping("/{guid}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('admin', 'reader')")
     public PaymentDto getPayment(@PathVariable UUID guid) {
-        return paymentService.getPayment(guid);
+        log.info("GET payment by id: {}", guid);
+        final PaymentDto paymentDto = paymentService.getPayment(guid);
+        log.debug("Sending response PaymentDto: {}", paymentDto);
+        return paymentDto;
     }
 
     @GetMapping("/search")
@@ -46,6 +54,9 @@ public class PaymentController {
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(defaultValue = "amount") String sortBy,
         @RequestParam(defaultValue = "desc") String direction) {
+
+        log.info("GET payments by filter: {}. Sorting by field {} with direction sort {}",
+            paymentFilter, sortBy, direction);
 
         if (!sortBy.equals("createdAt") && !sortBy.equals("amount")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -62,34 +73,52 @@ public class PaymentController {
         } else {
             sort = Sort.by(sortBy).ascending();
         }
-        return paymentService.searchPaged(paymentFilter, PageRequest.of(page, size, sort));
+
+        final Page<PaymentDto> paymentDtoPages = paymentService.searchPaged(paymentFilter,
+            PageRequest.of(page, size, sort));
+
+        log.debug("Sending response payments list with total elements = {} and total pages = {}",
+            paymentDtoPages.getTotalElements(), paymentDtoPages.getTotalPages());
+
+        return paymentDtoPages;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('admin')")
     public PaymentDto create(@RequestBody @Valid PaymentDto dto) {
-        return paymentService.create(dto);
+        log.info("Create payment with request data -> {}", dto);
+        final PaymentDto paymentDto = paymentService.create(dto);
+        log.debug("Created payment with id: {}", paymentDto.getGuid());
+        return paymentDto;
     }
 
     @PutMapping("/{guid}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('admin')")
     public PaymentDto update(@PathVariable UUID guid, @RequestBody PaymentDto dto) {
-        return paymentService.update(guid, dto);
+        log.info("Update payment with request id = {} and data -> {}", guid, dto);
+        final PaymentDto paymentDto = paymentService.update(guid, dto);
+        log.debug("Updated payment with id: {}", paymentDto.getGuid());
+        return paymentDto;
     }
 
     @DeleteMapping("/{guid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('admin')")
     public void delete(@PathVariable UUID guid) {
+        log.info("Delete payment with request id: {}", guid);
         paymentService.delete(guid);
+        log.debug("Deleted payment with id: {}", guid);
     }
 
     @PatchMapping("/{guid}/note")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('admin')")
     public PaymentDto updateNote(@PathVariable UUID guid, @RequestBody @Valid PaymentNoteUpdateDto noteDto) {
-        return paymentService.updateNote(guid, noteDto.getNote());
+        log.info("Update payment note with request id = {} and data -> {}", guid, noteDto);
+        final PaymentDto paymentDto = paymentService.updateNote(guid, noteDto.getNote());
+        log.debug("Updated payment note with id = {}. Set new note -> {}", paymentDto.getGuid(), paymentDto.getNote());
+        return paymentDto;
     }
 }
