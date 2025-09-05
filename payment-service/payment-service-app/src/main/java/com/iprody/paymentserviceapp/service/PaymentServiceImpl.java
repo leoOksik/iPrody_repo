@@ -1,9 +1,12 @@
 package com.iprody.paymentserviceapp.service;
 
+import com.iprody.paymentserviceapp.async.AsyncSender;
+import com.iprody.paymentserviceapp.async.XPaymentAdapterRequestMessage;
 import com.iprody.paymentserviceapp.dto.PaymentDto;
 import com.iprody.paymentserviceapp.exception.EntityNotFoundException;
 import com.iprody.paymentserviceapp.exception.OperationError;
 import com.iprody.paymentserviceapp.mapper.PaymentMapper;
+import com.iprody.paymentserviceapp.mapper.XPaymentAdapterMapper;
 import com.iprody.paymentserviceapp.persistence.PaymentFilterDTO;
 import com.iprody.paymentserviceapp.persistence.PaymentFilterFactory;
 import com.iprody.paymentserviceapp.persistence.PaymentRepository;
@@ -22,6 +25,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
+    private final XPaymentAdapterMapper xPaymentAdapterMapper;
+    private final AsyncSender<XPaymentAdapterRequestMessage> sender;
 
     @Override
     public List<PaymentDto> getPayments() {
@@ -39,7 +44,13 @@ public class PaymentServiceImpl implements PaymentService {
         final Payment entity = paymentMapper.toEntity(dto);
         entity.setGuid(UUID.randomUUID());
         final Payment saved = paymentRepository.save(entity);
-        return paymentMapper.toDto(saved);
+        final PaymentDto resultDto = paymentMapper.toDto(saved);
+
+        final XPaymentAdapterRequestMessage requestMessage = xPaymentAdapterMapper
+            .toXPaymentAdapterRequestMessage(entity);
+
+        sender.send(requestMessage);
+        return resultDto;
     }
 
     @Override
