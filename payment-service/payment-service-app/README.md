@@ -137,3 +137,16 @@ curl -H "Authorization: Bearer $ACCESS_TOKEN" "http://localhost:8080/actuator/me
 
 // Запросить информацию об HTTP запросах к приложению
 curl -H "Authorization: Bearer $ACCESS_TOKEN" "http://localhost:8080/actuator/metrics/http.server.requests"
+
+//-----------------------kafka-------------
+// в cmd
+// docker exec -it kafka /opt/bitnami/kafka/bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic demo
+
+curl -v -X POST "http://localhost:8080/api/payments" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer $ACCESS_TOKEN" \
+-d '{
+"amount":122.50,
+"currency":"USD",
+"status":"DECLINED"
+}'
