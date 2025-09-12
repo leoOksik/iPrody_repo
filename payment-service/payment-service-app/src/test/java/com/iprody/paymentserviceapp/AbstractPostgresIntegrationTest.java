@@ -8,6 +8,8 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.kafka.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 
@@ -26,11 +28,18 @@ public abstract class AbstractPostgresIntegrationTest {
             .withStrategy(Wait.forLogMessage(".*database system is ready to accept connections.*", 2)))
                 .withStartupTimeout(Duration.ofSeconds(200));
 
+    @Container
+    static final KafkaContainer KAFKA = new KafkaContainer(
+        DockerImageName.parse("apache/kafka:4.0.0")
+    );
+
     @DynamicPropertySource
     static void overrideProps(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
         registry.add("spring.liquibase.change-log", () -> "classpath:db/changelog/master-test-changelog.yaml");
+        registry.add("spring.kafka.bootstrap-servers", KAFKA::getBootstrapServers);
+        registry.add("spring.kafka.listener.auto-startup", () -> "false");
     }
 }
