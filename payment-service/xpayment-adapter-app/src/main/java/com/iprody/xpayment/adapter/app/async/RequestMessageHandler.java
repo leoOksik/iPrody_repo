@@ -25,17 +25,16 @@ public class RequestMessageHandler implements MessageHandler<XPaymentAdapterRequ
     public void handle(XPaymentAdapterRequestMessage message) {
 
         scheduler.schedule(() -> {
-            XPaymentAdapterResponseMessage responseMessage = new
+            final XPaymentAdapterResponseMessage responseMessage = new
                 XPaymentAdapterResponseMessage();
             responseMessage.setMessageId(message.getMessageId());
             responseMessage.setPaymentGuid(message.getPaymentGuid());
             responseMessage.setAmount(message.getAmount());
             responseMessage.setCurrency(message.getCurrency());
 
-            if(message.getAmount().remainder(BigDecimal.valueOf(2)).compareTo(BigDecimal.ZERO) == 0) {
+            if (message.getAmount().remainder(BigDecimal.valueOf(2)).compareTo(BigDecimal.ZERO) == 0) {
                 responseMessage.setStatus(XPaymentAdapterStatus.SUCCEEDED);
-            }
-            else {
+            } else {
                 responseMessage.setStatus(XPaymentAdapterStatus.CANCELLED);
             }
             responseMessage.setTransactionRefId(UUID.randomUUID());
