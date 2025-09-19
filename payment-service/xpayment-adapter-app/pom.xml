@@ -37,6 +37,11 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
             <artifactId>spring-kafka</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.7</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -54,6 +59,31 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>7.15.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/xpayment-api.openapi.yml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <library>resttemplate</library>
+                            <output>${project.build.directory}/generated-sources/openapi</output>
+                            <apiPackage>com.iprody.xpayment.app.api.client</apiPackage>
+                            <modelPackage>com.iprody.xpayment.app.api.model</modelPackage>
+                            <configOptions>
+                                <useTags>true</useTags>
+                                <useJakartaEe>true</useJakartaEe>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.6.0</version>
@@ -69,6 +99,11 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
                     <configLocation>checkstyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
                     <failOnViolation>true</failOnViolation>
+                    <violationSeverity>warning</violationSeverity>
+                    <sourceDirectories>
+                        <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                    </sourceDirectories>
+                    <excludes>**/generated-sources/**/*</excludes>
                 </configuration>
             </plugin>
         </plugins>

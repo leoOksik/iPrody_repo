@@ -33,27 +33,28 @@ public class KafkaXPaymentAdapterRequestListenerAdapter implements AsyncListener
         handler.handle(message);
     }
 
-    @KafkaListener(topics = "${app.kafka.topics.xpayment-adapter.request}", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(topics = "${app.kafka.topics.xpayment-adapter.request}",
+        groupId = "${spring.kafka.consumer.group-id}")
     public void consume(ConsumerRecord<String, XPaymentAdapterRequestMessage> record, Acknowledgment ack) {
         try {
             log.info("Received XPayment Adapter request: paymentGuid={}, partition={}, offset={}",
                 record.value().getPaymentGuid(), record.partition(), record.offset());
             if (isCorrectRecord(record)) {
                 onMessage(record.value());
-            }
-            else {
+            } else {
                 templateDlt.send("xpayment-adapter.requests-dlt", record.value());
             }
             ack.acknowledge();
         } catch (Exception e) {
-            log.error("Error handling XPayment Adapter request for paymentGuid = {}", record.value().getPaymentGuid(), e);
+            log.error("Error handling XPayment Adapter request for paymentGuid = {}",
+                record.value().getPaymentGuid(), e);
             throw e;
         }
     }
 
     private boolean isCorrectRecord(ConsumerRecord<String, XPaymentAdapterRequestMessage> record) {
-        BigDecimal amount = record.value().getAmount();
-        String currency = record.value().getCurrency();
+        final BigDecimal amount = record.value().getAmount();
+        final String currency = record.value().getCurrency();
 
         if (amount == null || amount.signum() < 0 || currency == null || currency.isEmpty()) {
             return false;
