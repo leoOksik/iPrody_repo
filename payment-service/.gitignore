@@ -36,3 +36,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### RabbitMQ Plugins ###
+*.ez
+rabbitmq_delayed_message_exchange-*

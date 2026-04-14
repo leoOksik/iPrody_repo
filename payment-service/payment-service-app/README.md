@@ -150,3 +150,5 @@ curl -v -X POST "http://localhost:8080/api/payments" \
 "currency":"USD",
 "status":"DECLINED"
 }'
+
+docker exec -it rabbitmq rabbitmq-plugins list | grep delayed

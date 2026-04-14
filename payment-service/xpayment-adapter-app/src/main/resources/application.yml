@@ -23,6 +23,13 @@ spring:
       ack-mode: manual
       concurrency: 1
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin
+
+
 app:
   kafka:
     topics:
@@ -31,9 +38,17 @@ app:
         response: xpayment-adapter.responses
         request-dlt: xpayment-adapter.requests-dlt
 
+  rabbitmq:
+    delayed-exchange-name: payment-state-check-exchange
+    queue-name: payment-state-check-queue
+    max-retries: 60
+    interval-ms: 60000
+    dlx-exchange-name: payments.dlx
+    dlx-routing-key: payments.dead
+
   x-payment-api:
-   client:
-     url: http://localhost:9999
-     username: paymentAgentIprody
-     password: iprodyTestPassword0123
-     account: paymentAgentIprodyApiToken
+    client:
+      url: http://localhost:9999
+      username: paymentAgentIprody
+      password: iprodyTestPassword0123
+      account: paymentAgentIprodyApiToken

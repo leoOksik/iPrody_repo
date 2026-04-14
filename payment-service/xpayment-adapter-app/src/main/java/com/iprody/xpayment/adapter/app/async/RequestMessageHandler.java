@@ -1,6 +1,7 @@
 package com.iprody.xpayment.adapter.app.async;
 
 import com.iprody.xpayment.adapter.app.api.XPaymentProviderGateway;
+import com.iprody.xpayment.adapter.app.checkstate.PaymentStateCheckRegistrar;
 import com.iprody.xpayment.adapter.app.dto.CreateChargeRequestDto;
 import com.iprody.xpayment.app.api.model.ChargeResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class RequestMessageHandler implements MessageHandler<XPaymentAdapterRequ
 
     private final XPaymentProviderGateway xPaymentProviderGateway;
     private final AsyncSender<XPaymentAdapterResponseMessage> asyncSender;
+    private final PaymentStateCheckRegistrar paymentStateCheckRegistrar;
 
     @Override
     public void handle(XPaymentAdapterRequestMessage message) {
@@ -42,6 +44,14 @@ public class RequestMessageHandler implements MessageHandler<XPaymentAdapterRequ
             responseMessage.setStatus(XPaymentAdapterStatus.valueOf(chargeResponse.getStatus()));
             responseMessage.setOccurredAt(OffsetDateTime.now());
             asyncSender.send(responseMessage);
+
+            paymentStateCheckRegistrar.register(
+                chargeResponse.getId(),
+                chargeResponse.getOrder(),
+                chargeResponse.getAmount(),
+                chargeResponse.getCurrency()
+            );
+
         } catch (RestClientException ex) {
 
             log.error("Error in time of sending payment request with paymentGuid - {}", message.getPaymentGuid(), ex);
